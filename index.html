@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xylem gib 5</title>
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+        }
+        .header {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .header h1 {
+            color: #00ff00;
+            font-size: 2.5rem;
+            margin: 0;
+        }
+        .header h2 {
+            color: #ffffff;
+            font-size: 1.2rem;
+            margin: 10px 0 5px 0;
+        }
+        .header p {
+            color: #aaaaaa;
+            font-size: 0.9rem;
+            margin: 5px 0;
+        }
+        .form-container {
+            background-color: #111111;
+            border: 1px solid #333333;
+            padding: 15px;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto 20px auto;
+            border-radius: 8px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .form-container input[type="text"] {
+            width: 90%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background-color: #222222;
+            border: 1px solid #444444;
+            color: #ffffff;
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        .form-container button {
+            width: 90%;
+            padding: 12px;
+            background-color: #00ff00;
+            color: #000000;
+            border: none;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .form-container button:hover {
+            background-color: #00cc00;
+        }
+        .message {
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #111111;
+            border: 1px solid #333333;
+        }
+        th, td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid #333333;
+            font-size: 0.9rem;
+        }
+        th {
+            background-color: #222222;
+            color: #00ff00;
+        }
+        tr:hover {
+            background-color: #1a1a1a;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 5px;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            th, td {
+                padding: 8px 5px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>XYLEM</h1>
+        <h2>Xylem gib 5</h2>
+        <p><strong>Exam:</strong> jee GIB (sep 27)</p>
+        <p>students rank and order in increasing order of rank</p>
+    </div>
+
+    <div class="form-container">
+        <h3>Add Your Rank</h3>
+        <form id="checkForm">
+            <input type="text" id="rollInput" name="roll" placeholder="Enter Roll Number" required>
+            <br>
+            <button type="submit">Submit & Fetch</button>
+        </form>
+        <div id="responseMsg" class="message"></div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Roll Number</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.rank }}</td>
+                    <td>{{ student.name }}</td>
+                    <td>{{ student.masked_roll }}</td>
+                    <td>{{ student.score }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.getElementById('checkForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const roll = document.getElementById('rollInput').value;
+            const msgDiv = document.getElementById('responseMsg');
+            msgDiv.style.color = '#ffffff';
+            msgDiv.innerText = 'Fetching result...';
+
+            try {
+                const res = await fetch('/fetch-result', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ roll: roll })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    msgDiv.style.color = '#00ff00';
+                    msgDiv.innerText = data.message;
+                    setTimeout(() => { window.location.reload(); }, 1500);
+                } else if (data.status === 'exists') {
+                    msgDiv.style.color = '#ffcc00';
+                    msgDiv.innerText = data.message;
+                } else {
+                    msgDiv.style.color = '#ff4444';
+                    msgDiv.innerText = data.message;
+                }
+            } catch (err) {
+                msgDiv.style.color = '#ff4444';
+                msgDiv.innerText = 'An error occurred. Please try again.';
+            }
+        });
+    </script>
+</body>
+</html>
